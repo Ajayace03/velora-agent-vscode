@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+agent/.venv/
+
+# Build output
+out/
+*.vsix
+
+# VS Code specific
+.vscode-test/
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/settings.json
+
+# OS generated files
+.DS_Store
+Thumbs.db

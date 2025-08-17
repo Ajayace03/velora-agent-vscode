@@ -1,0 +1,80 @@
+{
+  "name": "velora",
+  "displayName": "AI Agent Velora",
+  "description": "An AI agent to automatically refactor and document Python projects.",
+  "version": "1.0.0",
+  "publisher": "cryptarchs",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR-GITHUB-USERNAME/YOUR-REPO-NAME.git"
+  },
+  "homepage": "https://github.com/YOUR-GITHUB-USERNAME/YOUR-REPO-NAME",
+  "bugs": {
+    "url": "https://github.com/YOUR-GITHUB-USERNAME/YOUR-REPO-NAME/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "keywords": [
+    "ai",
+    "refactor",
+    "python",
+    "documentation",
+    "google gemini",
+    "restructure",
+    "organize",
+    "agent"
+  ],
+  "categories": [
+    "Other",
+    "Programming Languages",
+    "Machine Learning"
+  ],
+  "activationEvents": [
+    "onCommand:ai-project-refactorer.start"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ai-project-refactorer.start",
+        "title": "AI Agent: Start New Project Refactoring"
+      }
+    ],
+    "configuration": {
+      "title": "AI Project Refactorer",
+      "properties": {
+        "ai-project-refactorer.googleApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your Google API Key for the Generative AI service."
+        },
+        "ai-project-refactorer.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "The absolute path to the Python executable (e.g., C:\\Python39\\python.exe or /usr/bin/python3)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "eslint": "^9.32.0",
+    "typescript": "^5.9.2",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
