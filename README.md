@@ -203,7 +203,7 @@ If this extension helped you organize your projects, please:
 
 <div align="center">
 
-**Made with ❤️ by developers, for developers**
+**Made with ❤️ by Cryptarchs
 
 *Transform your chaotic code into beautiful, maintainable projects with just a few clicks!*
 
