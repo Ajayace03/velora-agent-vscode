@@ -33,6 +33,13 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                     const projectPath = workspaceFolders[0].uri.fsPath;
 
+                    // Validate API key before starting
+                    const apiKey = vscode.workspace.getConfiguration('ai-project-refactorer').get<string>('googleApiKey');
+                    if (!apiKey) {
+                        vscode.window.showErrorMessage('Google API Key not configured. Go to Settings > AI Project Refactorer to set your key.');
+                        return;
+                    }
+
                     // Tell the UI we are starting
                     panel.webview.postMessage({ command: 'set-running-state', running: true });
 
@@ -94,7 +101,7 @@ async function setupPythonEnvironment(context: vscode.ExtensionContext, progress
             // Use the configured pythonCommand instead of the hardcoded 'python'
             await runCommand(pythonCommand, ['-m', 'venv', '.venv']);
         }
-        
+
         // 2. Install dependencies from requirements.txt
         progress.report({ message: "Installing dependencies..." });
         await runCommand(pipExecutable, ['install', '-r', requirementsPath]);
@@ -104,9 +111,9 @@ async function setupPythonEnvironment(context: vscode.ExtensionContext, progress
     } catch (error) {
         // Provide more specific error messages for common Python setup issues
         const errorMessage = error instanceof Error ? error.message : String(error);
-        
+
         let userMessage = `Failed to set up Python environment: ${errorMessage}`;
-        
+
         if (errorMessage.includes('python')) {
             userMessage = `Python not found. Please check your Python path in settings. Current path: "${pythonCommand}"`;
         } else if (errorMessage.includes('venv')) {
@@ -114,7 +121,7 @@ async function setupPythonEnvironment(context: vscode.ExtensionContext, progress
         } else if (errorMessage.includes('requirements.txt')) {
             userMessage = `Failed to install dependencies. Check if requirements.txt exists and contains valid packages.`;
         }
-        
+
         vscode.window.showErrorMessage(userMessage);
         throw error;
     }
@@ -132,7 +139,7 @@ async function runAgent(
         const pythonPath = await setupPythonEnvironment(context, progress);
         const agentPath = path.join(context.extensionPath, 'agent');
         const scriptPath = path.join(agentPath, 'run_agent.py');
-        
+
         const args = [
             scriptPath,
             '--project-path', projectPath,
@@ -148,7 +155,7 @@ async function runAgent(
         outputChannel.appendLine(">>> Starting AI Agent...");
         outputChannel.appendLine(`>>> Project Path: ${projectPath}`);
         outputChannel.appendLine("---------------------------------------------------\n");
-        
+
         const agentProcess = spawn(pythonPath, args, {
             env: {
                 ...process.env,
@@ -193,15 +200,20 @@ async function runAgent(
                 }
             });
 
+            let errorShown = false;
+
             // Pipe stderr to the output channel
             agentProcess.stderr.on('data', (data) => {
                 outputChannel.appendLine(`[ERROR] ${data.toString()}`);
-                vscode.window.showErrorMessage(`Agent Error: See the "AI Agent" output channel for details.`);
+                if (!errorShown) {
+                    vscode.window.showErrorMessage(`Agent Error: See the "AI Agent" output channel for details.`);
+                    errorShown = true;
+                }
             });
 
             agentProcess.on('close', (code) => {
                 outputChannel.appendLine("\n---------------------------------------------------");
-                
+
                 // If the process was killed because of cancellation, just resolve.
                 if (token.isCancellationRequested) {
                     outputChannel.appendLine(">>> AI Agent process was cancelled.");
@@ -216,7 +228,7 @@ async function runAgent(
                     resolve();
                 } else {
                     outputChannel.appendLine(`>>> AI Agent process exited with error code ${code}.`);
-                    
+
                     // Provide smarter error messages based on exit codes
                     let userMessage = `Agent process exited with error code ${code}.`;
                     switch (code) {
@@ -236,7 +248,7 @@ async function runAgent(
                             userMessage = `Agent process failed with unexpected error code ${code}. Check the output panel for details.`;
                             break;
                     }
-                    
+
                     vscode.window.showErrorMessage(userMessage);
                     reject(new Error(`Agent process exited with code ${code}`));
                 }
@@ -584,19 +596,19 @@ function getWebviewContent() {
     <body>
         <div class="container">
             <div class="header">
-                <h1>🤖 Velora AI Agent</h1>
+                <h1> Velora AI Agent</h1>
                 <p class="subtitle">Intelligent Project Refactoring Assistant</p>
             </div>
             
             <div class="form-content">
                 <div class="form-group">
-                    <label for="persona">👤 Who are you? <span class="feature-badge">Role</span></label>
+                    <label for="persona"> Who are you? <span class="feature-badge">Role</span></label>
                     <div class="input-wrapper">
                         <select id="persona">
-                            <option value="Developer">👨‍💻 Developer</option>
-                            <option value="Data Scientist">📊 Data Scientist</option>
-                            <option value="Researcher">🔬 Researcher</option>
-                            <option value="Student">🎓 Student</option>
+                            <option value="Developer"> Developer</option>
+                            <option value="Data Scientist"> Data Scientist</option>
+                            <option value="Researcher"> Researcher</option>
+                            <option value="Student"> Student</option>
                         </select>
                     </div>
 					
@@ -604,36 +616,34 @@ function getWebviewContent() {
                 </div>
 
                 <div class="form-group">
-                    <label for="pain-points">🎯 What are your main pain points? <span class="feature-badge">Issues</span></label>
+                    <label for="pain-points"> What are your main pain points? <span class="feature-badge">Issues</span></label>
                     <div class="input-wrapper">
                         <textarea id="pain-points" placeholder="Describe the challenges you're facing with this project...">Messy code structure, no clear organization, missing documentation, hard to maintain</textarea>
-                        <div class="input-icon">💭</div>
-						// Continuation of getWebviewContent() function from where it was cut off:
-
+                        <div class="input-icon"></div>
                     </div>
                     <div class="form-hint">Be specific about what's frustrating or blocking your progress</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="use-cases">🚀 What do you want to achieve? <span class="feature-badge">Goals</span></label>
+                    <label for="use-cases"> What do you want to achieve? <span class="feature-badge">Goals</span></label>
                     <div class="input-wrapper">
                         <textarea id="use-cases" placeholder="Describe what you want to accomplish with this project...">Better code organization, improved maintainability, automated testing setup, clear documentation</textarea>
-                        <div class="input-icon">🎯</div>
+                        <div class="input-icon"></div>
                     </div>
                     <div class="form-hint">Outline your desired outcomes and use cases</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="success-metrics">📈 How will you measure success? <span class="feature-badge">Metrics</span></label>
+                    <label for="success-metrics"> How will you measure success? <span class="feature-badge">Metrics</span></label>
                     <div class="input-wrapper">
                         <textarea id="success-metrics" placeholder="Define what success looks like for you...">Reduced code complexity, faster development time, easier onboarding for new developers, comprehensive test coverage</textarea>
-                        <div class="input-icon">📊</div>
+                        <div class="input-icon"></div>
                     </div>
                     <div class="form-hint">Define measurable outcomes to track progress</div>
                 </div>
 
                 <button class="start-button" id="start-agent" onclick="startAgent()">
-                    <span id="button-text">🚀 Start AI Agent</span>
+                    <span id="button-text"> Start AI Agent</span>
                 </button>
 
                 <div class="status-area" id="status-area">
@@ -680,7 +690,7 @@ function getWebviewContent() {
                     inputs.forEach(input => input.disabled = true);
                 } else {
                     startButton.disabled = false;
-                    buttonText.innerHTML = '🚀 Start AI Agent';
+                    buttonText.innerHTML = ' Start AI Agent';
                     
                     // Re-enable form inputs
                     const inputs = document.querySelectorAll('input, select, textarea');

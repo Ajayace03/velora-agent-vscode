@@ -1,4 +1,9 @@
-# ai_struct_phase1_enhanced_v4.py
+# -----------------------------------------------------------------------------
+# Phase 1: AI Struct Agent - Enhanced Version 1.0.0
+# -----------------------------------------------------------------------------
+# This module implements the first phase of the AI Struct Agent, focusing on
+# project discovery, pain point analysis, and initial strategy formulation.
+
 
 import os
 import sys
@@ -12,16 +17,15 @@ import argparse
 from pathlib import Path
 import re
 
-import google.generativeai as genai
+from google import genai
 
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-AGENT_VERSION = "1.0.1"
+AGENT_VERSION = "1.0.0"
 API_KEY = os.getenv("GOOGLE_API_KEY")
-if not API_KEY:
-    raise RuntimeError("Please set the GOOGLE_API_KEY environment variable.")
-genai.configure(api_key=API_KEY)
+CLIENT = genai.Client(api_key=API_KEY) if API_KEY else None
+MODEL = "gemini-2.5-flash"
 
 # --- Enhanced, Persona-Specific Markdown Templates ---
 PERSONAS = ["Developer", "Data Scientist", "Researcher", "Student"]
@@ -148,8 +152,12 @@ FALLBACK_TEMPLATE = TEMPLATES["Developer"] # Use Developer as a robust default
 def check_internet(host="8.8.8.8", port=53, timeout=3):
     try:
         socket.setdefaulttimeout(timeout)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
-        return True
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect((host, port))
+            return True
+        finally:
+            s.close()
     except Exception:
         return False
 
@@ -223,21 +231,15 @@ def summarize_and_cluster_pain_points(pain_points):
         "JSON output only."
     )
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        response = CLIENT.models.generate_content(
+            model=MODEL,
+            contents=prompt,
+            config={"response_mime_type": "application/json"}
         )
         return json.loads(response.text)
     except Exception:
         # Fallback to simple clustering if AI fails
         return {"General Issues": pain_points}
-
-# -----------------------------------------------------------------------------
-# Main Flow
-# -----------------------------------------------------------------------------
-# In ai_struct_phase1_enhanced_v4.py
-# (Delete your old main function and replace it with these two)
 
 # -----------------------------------------------------------------------------
 # Main Flow
@@ -250,6 +252,10 @@ def execute_phase1(project_path: str, persona: str, pain_points: list, use_cases
     It takes all inputs as parameters and does not use `input()` or `sys.exit()`.
     Returns True on success, False on failure.
     """
+    if not CLIENT:
+        print("❌ GOOGLE_API_KEY environment variable is not set.")
+        return False
+
     project_root = Path(project_path)
     if not project_root.exists() or not project_root.is_dir():
         print(f"❌ Invalid project path: {project_root}")
@@ -307,8 +313,7 @@ The summary should:
     executive_summary = "AI generation failed. A structured project will be proposed based on the collected metadata."
     error_log = None
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        resp = model.generate_content(prompt)
+        resp = CLIENT.models.generate_content(model=MODEL, contents=prompt)
         executive_summary = resp.text.strip()
     except Exception as e:
         error_log = str(e)

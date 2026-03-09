@@ -1,4 +1,11 @@
-# ai_struct_phase3_documentation_generator.py
+# -----------------------------------------------------------------------------
+# Phase 3: AI Struct Agent - Documentation & File Generation v1.0.0
+# -----------------------------------------------------------------------------
+# This module implements the third phase of the AI Struct Agent, focusing on
+# comprehensive project documentation, missing file generation, and smoke testing.
+# It includes enhanced code analysis, AI-powered documentation generation,
+# and a structured output generation.
+# -----------------------------------------------------------------------------
 
 import os
 import sys
@@ -6,19 +13,16 @@ import json
 import subprocess
 from pathlib import Path
 import ast
-import google.generativeai as genai
+from google import genai
 from typing import Dict, List, Set, Tuple
 
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-AGENT_VERSION = "3.0.0"
+AGENT_VERSION = "1.0.0"
 API_KEY = os.getenv("GOOGLE_API_KEY")
-if not API_KEY:
-    raise RuntimeError("Please set the GOOGLE_API_KEY environment variable.")
-genai.configure(api_key=API_KEY)
-
-MODEL = "gemini-2.0-flash"
+CLIENT = genai.Client(api_key=API_KEY) if API_KEY else None
+MODEL = "gemini-2.5-flash"
 PHASE2_OUTPUT_ROOT = Path("./structured_project")
 PHASE1_METADATA_JSON = Path("phase1_metadata.json")
 
@@ -106,7 +110,7 @@ class CodeAnalyzer:
                    node.test.left.id == "__name__" and
                    any(isinstance(c, ast.Constant) and c.value == "__main__" 
                        for c in node.test.comparators))
-        except:
+        except Exception:
             return False
     
     def _classify_file_role(self, rel_path: str, classes: List, functions: List, entry_point: bool) -> str:
@@ -303,7 +307,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="{project_name}",
-    version="0.1.0",
+    version="1.0.0",
     description="Auto-generated setup for restructured project",
     packages=find_packages(),
     python_requires=">=3.7",
@@ -373,9 +377,8 @@ Make it professional, clear, and tailored to the user's persona and project type
 Output only the README content in Markdown format.
 """
         
-        model = genai.GenerativeModel(MODEL)
         try:
-            response = model.generate_content(prompt)
+            response = CLIENT.models.generate_content(model=MODEL, contents=prompt)
             return response.text.strip()
         except Exception as e:
             print(f"❌ AI README generation failed: {e}")
@@ -402,9 +405,8 @@ Make it technical but accessible for developers joining the project.
 Output only the workflow document in Markdown format.
 """
         
-        model = genai.GenerativeModel(MODEL)
         try:
-            response = model.generate_content(prompt)
+            response = CLIENT.models.generate_content(model=MODEL, contents=prompt)
             return response.text.strip()
         except Exception as e:
             print(f"❌ Workflow generation failed: {e}")
@@ -560,12 +562,6 @@ class SmokeTestSuite:
 # -----------------------------------------------------------------------------
 # 5. Main Phase 3 Execution
 # -----------------------------------------------------------------------------
-# In ai_struct_phase3_documentation_generator.py
-# (Delete your old main function and replace it with these two)
-
-# -----------------------------------------------------------------------------
-# 5. Main Phase 3 Execution
-# -----------------------------------------------------------------------------
 
 def execute_phase3() -> bool:
     """
@@ -575,6 +571,10 @@ def execute_phase3() -> bool:
     """
     print(f"🚀 AI Structure Agent Phase 3: Documentation & File Generation v{AGENT_VERSION}")
     
+    if not CLIENT:
+        print("❌ GOOGLE_API_KEY environment variable is not set.")
+        return False
+
     # Check if Phase 2 output exists
     if not PHASE2_OUTPUT_ROOT.exists():
         print(f"❌ Phase 2 output not found at {PHASE2_OUTPUT_ROOT}. Please run Phase 2 first.")
