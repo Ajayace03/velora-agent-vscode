@@ -1,17 +1,18 @@
 {
   "name": "velora",
-  "displayName": "AI Agent Velora",
+  "displayName": "Velora-Agent",
+  "publisherDisplayName": "Cryptarchs",
   "description": "An AI agent to automatically refactor and document Python projects.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "cryptarchs",
   "icon": "images/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR-GITHUB-USERNAME/YOUR-REPO-NAME.git"
+    "url": "https://github.com/Ajayace03/velora-agent-vscode"
   },
-  "homepage": "https://github.com/YOUR-GITHUB-USERNAME/YOUR-REPO-NAME",
+  "homepage": "https://github.com/Ajayace03/velora-agent-vscode",
   "bugs": {
-    "url": "https://github.com/YOUR-GITHUB-USERNAME/YOUR-REPO-NAME/issues"
+    "url": "https://github.com/Ajayace03/velora-agent-vscode/issues"
   },
   "engines": {
     "vscode": "^1.85.0"

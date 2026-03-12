@@ -1,4 +1,4 @@
-google-generativeai
+google-genai
 jsonschema
 libcst
 pipreqs

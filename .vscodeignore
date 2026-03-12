@@ -1,11 +1,27 @@
-.vscode/**
-.vscode-test/**
-src/**
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
-**/tsconfig.json
-**/eslint.config.mjs
-**/*.map
-**/*.ts
-**/.vscode-test.*
+# This file tells the packager which files NOT to include in the extension.
+
+# Ignore the Python virtual environment (THIS IS THE FIX FOR THE LARGE FILE SIZE)
+agent/.venv/
+
+# Ignore development dependencies
+node_modules/
+
+# Ignore the compiled output folder (vsce includes it by default, but this is good practice)
+# out/
+
+# Ignore TypeScript source code, we only need the compiled JavaScript
+src/
+
+# Ignore TypeScript and ESLint configuration files
+tsconfig.json
+eslint.config.mjs
+.eslintrc.json
+
+# Ignore the packaged file itself
+*.vsix
+
+# Ignore Git folder
+.git/
+
+# Ignore testing folders and files
+.vscode-test/

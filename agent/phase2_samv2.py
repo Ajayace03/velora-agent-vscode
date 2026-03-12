@@ -1,5 +1,12 @@
-# ai_struct_phase2_full_refactor_v2.2.py
-
+# -----------------------------------------------------------------------------
+# Phase 2: AI Struct Agent - Full Refactor v1.0.0
+# -----------------------------------------------------------------------------
+# This module implements the second phase of the AI Struct Agent, focusing on
+# refactoring a messy project structure based on AI-generated recommendations.
+# It includes enhanced file discovery, import refactoring using LibCST, and
+# structured output generation.
+# -----------------------------------------------------------------------------
+import argparse
 import os
 import sys
 import json
@@ -7,20 +14,17 @@ import shutil
 import subprocess
 from pathlib import Path
 import re
-import google.generativeai as genai
+from google import genai
 import jsonschema
 import libcst as cst
 
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-AGENT_VERSION = "2.2.0"
+AGENT_VERSION = "1.0.0"
 API_KEY = os.getenv("GOOGLE_API_KEY")
-if not API_KEY:
-    raise RuntimeError("Please set the GOOGLE_API_KEY environment variable.")
-genai.configure(api_key=API_KEY)
-
-MODEL = "gemini-2.0-flash"
+CLIENT = genai.Client(api_key=API_KEY) if API_KEY else None
+MODEL = "gemini-2.5-flash"
 PHASE1_METADATA_JSON = Path("phase1_metadata.json")
 OUTPUT_ROOT = Path("./structured_project")
 
@@ -236,13 +240,11 @@ Create a JSON object that maps every single original file path to a new, structu
 
 Strictly output JSON only.
 """
-    model = genai.GenerativeModel(MODEL)
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                response_mime_type="application/json", temperature=0.2
-            ),
+        response = CLIENT.models.generate_content(
+            model=MODEL,
+            contents=prompt,
+            config={"response_mime_type": "application/json", "temperature": 0.2}
         )
         return json.loads(response.text)
     except Exception as e:
@@ -339,12 +341,6 @@ def save_refactor_report(output_root: Path, mapping: dict, persona: str):
 # -----------------------------------------------------------------------------
 # Main Execution
 # -----------------------------------------------------------------------------
-# In ai_struct_phase2_full_refactor_v2.2.py
-# (Delete your old main function and replace it with these two)
-
-# -----------------------------------------------------------------------------
-# Main Execution
-# -----------------------------------------------------------------------------
 
 def execute_phase2(auto_confirm: bool = False) -> bool:
     """
@@ -356,6 +352,10 @@ def execute_phase2(auto_confirm: bool = False) -> bool:
         auto_confirm (bool): If True, bypasses the user confirmation prompt
                              and proceeds with the refactoring.
     """
+    if not CLIENT:
+        print("❌ GOOGLE_API_KEY environment variable is not set.")
+        return False
+
     if not PHASE1_METADATA_JSON.exists():
         print(f"❌ Phase 1 output not found at {PHASE1_METADATA_JSON}. Please run Phase 1 first.")
         return False
