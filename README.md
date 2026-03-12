@@ -310,7 +310,7 @@ This project is licensed under the [MIT License](LICENSE).
 |---|---|
 | **Email** | [ajayak0304@gmail.com](mailto:ajayak0304@gmail.com) |
 | **GitHub** | [github.com/Ajayace03](https://github.com/Ajayace03) |
-| **LinkedIn** | [linkedin.com/in/ajay-bharathi](https://linkedin.com/in/ajay-bharathi) |
+| **LinkedIn** | [linkedin.com/in/ajay-bharathi](https://linkedin.com/in/ajay-bharathi-ace) |
 | **Publisher** | Cryptarchs |
 
 ---
