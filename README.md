@@ -1,5 +1,10 @@
 # Velora AI Agent
 
+<div align="center">
+
+![Velora AI Agent](images/banner_velora.png)
+
+</div>
 **An intelligent VS Code extension that transforms messy Python projects into well-structured, maintainable codebases using the power of Google Gemini AI.**
 
 [![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue?logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=cryptarchs.velora)
